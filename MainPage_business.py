@@ -3,7 +3,7 @@
 """
 Module implementing MainPage.
 """
-import sys,os
+import sys, os
 import threading
 import PyQt5
 from PyQt5 import QtGui, QtCore
@@ -16,6 +16,7 @@ import datetime
 import json
 import pymongo
 from resource.MainPage import Ui_MainPage
+
 
 class MainPage(QMainWindow, Ui_MainPage):
     """
@@ -35,42 +36,40 @@ class MainPage(QMainWindow, Ui_MainPage):
         self.Information_tableWidget.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.SoundTip = SoundTip(self)
         self.Scrap_pushButton.clicked.connect(self.on_Scrap_pushButton_clicked)
-        self.Mongo_URl='localhost'
-        self.Mongo_DB='Video'
-        self.Mongo_Table='VideoInformation'
-        self.client=pymongo.MongoClient(self.Mongo_URl)
-        self.db=self.client[self.Mongo_DB]
-        self.Mongo_Table=self.db.list_collection_names()[0]
-        self.Information=list(self.db[self.Mongo_Table].find())
+        self.Mongo_URl = 'localhost'
+        self.Mongo_DB = 'Video'
+        self.Mongo_Table = 'VideoInformation'
+        self.client = pymongo.MongoClient(self.Mongo_URl)
+        self.db = self.client[self.Mongo_DB]
+        self.Mongo_Table = self.db.list_collection_names()[0]
+        self.Information = list(self.db[self.Mongo_Table].find())
         self.Initial()
         self.HomePageUrl_lineEdit.setText(self.Mongo_Table)
 
     def Initial(self):
-        row=self.Information_tableWidget.rowCount()
-        Info_len=len(self.Information)
-        while(row<Info_len):
+        row = self.Information_tableWidget.rowCount()
+        Info_len = len(self.Information)
+        while (row < Info_len):
             self.Information_tableWidget.insertRow(row)
-            row=self.Information_tableWidget.rowCount()
+            row = self.Information_tableWidget.rowCount()
         for i in range(len(self.Information)):
             self.Information_tableWidget.setItem(i, 0, QTableWidgetItem(self.Information[i]['title']))
             self.Information_tableWidget.setItem(i, 1, QTableWidgetItem(self.Information[i]['TimeLength']))
-            if i==0:
+            if i == 0:
                 self.Information_tableWidget.setItem(i, 2, QTableWidgetItem('最近更新'))
             else:
                 self.Information_tableWidget.setItem(i, 2, QTableWidgetItem('无更新'))
 
-
-    def getHTMLText(self,url):
+    def getHTMLText(self, url):
         try:
             header = {
                 "User-Agent": "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, "
                               "like Gecko) Chrome/79.0.3945.88 Mobile Safari/537.36 "
             }
             r = requests.get(url, headers=header)
-            r.raise_for_status()  # 如果不是200，产生异常requests.HTTPError
-            if r:
+            if type(r) is not None:
                 return r
-            else: 
+            else:
                 self.getHTMLText(url)
         except:
             self.getHTMLText(url)
@@ -100,20 +99,22 @@ class MainPage(QMainWindow, Ui_MainPage):
         suburl = re.findall(pattern, url_s)[0]
 
         # 获取videonew.do链接,并从中获取'su'、'ck'参数信息
-        videonew_url = "https://my.tv.sohu.com/play/videonew.do?vid={0}&ver=&ssl=1&referer=https%3A%2F%2Ftv.sohu.com%2Fv%2F{1}%3D%3D.html&t={2}".format(id, suburl, time)
+        videonew_url = "https://my.tv.sohu.com/play/videonew.do?vid={0}&ver=&ssl=1&referer=https%3A%2F%2Ftv.sohu.com%2Fv%2F{1}%3D%3D.html&t={2}".format(
+            id, suburl, time)
         # html=get_jsondata(videonew_url)
-        html=self.getHTMLText(videonew_url)
+        html = self.getHTMLText(videonew_url)
         if html.content:
-            html=html.json()
+            html = html.json()
         su = html['data']['su'][0]
         ck = html['data']['ck'][0]
 
         # 通过获取的参数信息构成ip?new链接（包含后台视频链接的真正链接）
-        ipnew_url = 'https://data.vod.itc.cn/ip?new={0}&num=1&key={1}&ch=pgc&pt=1&pg=2&prod=h5n&uid=15775043675348643281'.format(su, ck)
+        ipnew_url = 'https://data.vod.itc.cn/ip?new={0}&num=1&key={1}&ch=pgc&pt=1&pg=2&prod=h5n&uid=15775043675348643281'.format(
+            su, ck)
         # html=get_jsondata(ipnew_url)
-        html=self.getHTMLText(ipnew_url)
+        html = self.getHTMLText(ipnew_url)
         if html.content:
-            html=html.json()
+            html = html.json()
         url = html['servers'][0]['url']
         return url
 
@@ -128,10 +129,10 @@ class MainPage(QMainWindow, Ui_MainPage):
             link = i['url']
             Timelength = self.TimeConvert(i['videoLength'])
             video_source = self.get_videoUrl(i['url'], i['id'], i['uploadTime'])
-            data.append({'title':title, 'TimeLength':Timelength, 'url':link, 'video_url':video_source})
+            data.append({'title': title, 'TimeLength': Timelength, 'url': link, 'video_url': video_source})
         return data
 
-    def save_to_database(self,result):
+    def save_to_database(self, result):
         if self.db[self.Mongo_Table].remove() and self.db[self.Mongo_Table].insert(result):
             return True
         else:
@@ -145,44 +146,44 @@ class MainPage(QMainWindow, Ui_MainPage):
                 url = "https://my.tv.sohu.com/user/wm/ta/v.do?callback=jQuery17208274530945288818_1577511351653&uid" \
                       "=293643430&pg=1&size=50&sortType=2&_=1577511351689 "
             self.Info = self.openurl(url)
-            title=[]
+            title = []
             for i in self.Information:
                 title.append(i['title'])
-            title_new=[]
+            title_new = []
             for i in self.Info:
                 title_new.append(i['title'])
-            if title_new!=title:
-                for i,value in enumerate(self.Info):
+            if title_new != title:
+                for i, value in enumerate(self.Info):
                     if value['title'] in title:
                         self.Information_tableWidget.setItem(i, 2, QTableWidgetItem('无更新'))
                     else:
                         self.Information_tableWidget.insertRow(0)
                         self.Information_tableWidget.setItem(0, 0, QTableWidgetItem(value['title']))
                         self.Information_tableWidget.setItem(0, 1, QTableWidgetItem(value['TimeLength']))
-                        file_path='{0}/video/{1}.{2}'.format(os.getcwd(),value['title'],'mp4')
+                        file_path = '{0}/video/{1}.{2}'.format(os.getcwd(), value['title'], 'mp4')
                         header = {
-                        "User-Agent": "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, "
-                                    "like Gecko) Chrome/79.0.3945.88 Mobile Safari/537.36 "
-                                    }
-                        video=requests.get(value['video_url'],headers=header).content
-                        DownLoad_statu='正在下载'
+                            "User-Agent": "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, "
+                                          "like Gecko) Chrome/79.0.3945.88 Mobile Safari/537.36 "
+                        }
+                        video = requests.get(value['video_url'], headers=header).content
+                        DownLoad_statu = '正在下载'
                         self.Information_tableWidget.setItem(i, 2, QTableWidgetItem(DownLoad_statu))
                         if not os.path.exists(file_path):
-                            with open(file_path,'wb') as f:
+                            with open(file_path, 'wb') as f:
                                 f.write(video)
                                 f.close()
-                        DownLoad_statu='下载完毕'
+                        DownLoad_statu = '下载完毕'
                         self.Information_tableWidget.setItem(i, 2, QTableWidgetItem(DownLoad_statu))
                     self.SoundTip.start()
-                self.Information=self.Info
+                self.Information = self.Info
                 self.save_to_database(self.Information)
-            self.Mongo_Table=url
-            threading.Timer(60, mask).start()
+            self.Mongo_Table = url
+            threading.Timer(300, mask).start()
+
         self.Scrap_pushButton.setText("监听下载中...")
         self.Scrap_pushButton.setCheckable(False)
         self.Scrap_pushButton.repaint()
         mask()
-
 
     @pyqtSlot(int, int)
     def on_Information_tableWidget_cellClicked(self, row, column):
