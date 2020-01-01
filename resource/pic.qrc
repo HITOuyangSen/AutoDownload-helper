@@ -1,0 +1,14 @@
+<RCC>
+  <qresource prefix="load">
+    <file>images/background.bmp</file>
+  </qresource>
+  <qresource prefix="register">
+    <file>images/background.bmp</file>
+  </qresource>
+  <qresource prefix="reset">
+    <file>images/background.bmp</file>
+  </qresource>
+  <qresource prefix="mainwindow">
+    <file>images/Mainbackground.bmp</file>
+  </qresource>
+</RCC>
