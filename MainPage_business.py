@@ -38,7 +38,6 @@ class MainPage(QMainWindow, Ui_MainPage):
         self.Scrap_pushButton.clicked.connect(self.on_Scrap_pushButton_clicked)
         self.Mongo_URl = 'localhost'
         self.Mongo_DB = 'Video'
-        self.Mongo_Table = 'VideoInformation'
         self.client = pymongo.MongoClient(self.Mongo_URl)
         self.db = self.client[self.Mongo_DB]
         self.Mongo_Table = self.db.list_collection_names()[0]
@@ -200,6 +199,7 @@ class MainPage(QMainWindow, Ui_MainPage):
 class SoundTip(QThread):
     def __init__(self, parent=None, *args, **kwargs):
         super(SoundTip, self).__init__(parent, *args, **kwargs)
+
         self.sound_file = 'resource/images/tipSound.wav'
         self.sound = QSoundEffect()
         self.sound.setSource(PyQt5.QtCore.QUrl.fromLocalFile(self.sound_file))
