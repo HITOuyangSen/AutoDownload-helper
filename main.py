@@ -1,25 +1,26 @@
 import sys
-import PyQt5
+
 import PyQt5.sip
 from PyQt5.QtWidgets import QApplication
-import LoadPage_business, MainPage_business
+import MainPage_business
+import LoadPage_business
 import RegisterPage_business
 import ResetPswdPage__business
-
+import MainPage_business
 
 def show_register():
-    register_window = RegisterPage_business.RegisterPage(window)
-    register_window.show()
+    window.register_window = RegisterPage_business.RegisterPage(window)
+    window.register_window.show()
 
 
 def show_resetpswd():
-    reset_window = ResetPswdPage__business.ResetPswdPage(window)
-    reset_window.show()
+    window.reset_window = ResetPswdPage__business.ResetPswdPage(window)
+    window.reset_window.show()
 
 
 def show_mainwindow():
-    register_window = MainPage_business.MainPage(window)
-    register_window.show()
+    window.MainPage_window = MainPage_business.MainPage(window)
+    window.MainPage_window.show()
     window.hide()
 
 
